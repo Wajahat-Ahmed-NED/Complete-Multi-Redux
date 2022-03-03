@@ -1,32 +1,16 @@
-// import logo from './logo.svg';
-import './App.css';
-import AppRouter from './config/router';
-// import Firebase from "./config/firebase";
-import * as React from 'react';
-// import Stack from '@mui/material/Stack';
-// import Button from '@mui/material/Button';
+import "./App.css";
+import AppRouter from "./config/router";
+import { Provider } from "react-redux";
+import store from "./config/store";
 
-    
 function App() {
   return (
     <div className="App">
-      
-      <AppRouter />
-
-
-      {/* <Stack direction="row" spacing={2}>
-      <Button color="secondary">Secondary</Button>
-      <Button variant="outlined" color="success">
-        Success
-      </Button>
-      <Button variant="contained" color="error">
-        Error
-      </Button>
-    </Stack> */}
-
+      <Provider store={store}>
+        <AppRouter />
+      </Provider>
     </div>
   );
 }
-
 
 export default App;

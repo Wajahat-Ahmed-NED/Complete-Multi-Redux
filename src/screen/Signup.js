@@ -1,58 +1,83 @@
-import React from 'react'
-import Button from '../components/Button'
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
-import { createUserWithEmailAndPassword } from '@firebase/auth'
-import { auth, db,ref,set } from '../config/firebase'
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
+import Button from "../components/Button";
+import Input from "../components/Input";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../config/firebase";
+// import { signUp } from "../config/firebase";
 
-export default function Signup() {
-    const [name, setName] = useState("")
-    const [email, setEmail] = useState("")
-    const [password, setPassword] = useState("")
-    const Signup = (e) => {
-        e.preventDefault()
+function SignUp() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [name, setName] = useState("");
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+
+    let signup = (e) => {
+        e.preventDefault();
         let obj = {
-            name,
             email,
             password,
-        }
+            name,
+        };
+        
         createUserWithEmailAndPassword(auth, obj.email, obj.password)
-        .then((res) => {
-            let uid = res.user.uid;
-            console.log(uid);
-            obj.uid = uid;
-            const refrence = ref(db, `/users/${obj.uid}`);
-            console.log(obj.uid)
-            set(refrence, obj).then(() => {
-              setEmail("");
-              setPassword("");
-              setName("");
-              alert("user created Successfully");
+            .then((userCredential) => {
+                // Signed in
+                console.log(userCredential)
+                const user = userCredential.user;
+                let uid = user.uid;
+                dispatch({
+                    type: "SIGNUPDATA",
+                    uid:uid,
+                });
+                navigate("/")
             })
-            .catch((err)=>{console.log(err.message)})
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                alert(errorMessage);
+                // ..
+            });
 
-          }).catch((err) => {
-                console.log(err.message)
-            })
-        console.log(obj)
+    };
 
-    }
-    // provider((e)=>{
-    //     console.log(e)
-    // })
     return (
         <>
-            <h1>Sign up</h1>
-            <form onSubmit={(e) => { Signup(e) }}>
-                <input value={name} onChange={(e) => setName(e.target.value)} type="text" placeholder="Enter your Name" /><br />
-                <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="Enter Email Address" /><br />
-                <input value={password} onChange={(e) => setPassword(e.target.value)} type="password" placeholder="Enter Password" /><br />
-                <Button value="Sign up" />
-
-            </form>
-            <hr />
-            <h3>Already have an account?</h3>
-            <Link to="/login">Login</Link> Here
+            <div className="head">
+                <h1>Sign Up</h1>
+            </div>
+            <div>
+                <form onSubmit={(e) => signup(e)}>
+                    <div>
+                        <Input
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Name"
+                            type="text"
+                        />
+                    </div>
+                    <div>
+                        <Input
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Email"
+                            type="email"
+                        />
+                    </div>
+                    <div>
+                        <Input
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Password"
+                            type="password"
+                        />
+                    </div>
+                    <div>
+                        <Button>Sign Up</Button>
+                    </div>
+                </form>
+            </div>
         </>
-    )
+    );
 }
+export default SignUp;
